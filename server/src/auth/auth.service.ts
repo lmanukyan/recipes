@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { LoginUserDto, CreateUserDto, ResetPasswordDto, ChangePasswordDto } from '../users/dto/user.dto';
+import { LoginUserDto, CreateUserDto, ResetPasswordDto, ChangePasswordDto, UserResponse } from '../users/dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { MailService } from '../mail/mail.service';
@@ -7,13 +7,6 @@ import { User } from '../users/schemas/user.schema';
 import { RolesEnum } from '../users/enums/roles.enum';
 import * as bcrypt from 'bcrypt';
 
-interface UserResponse {
-    accessToken: string;
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-}
 
 @Injectable()
 export class AuthService {

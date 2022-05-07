@@ -56,3 +56,11 @@ export class ChangePasswordDto {
     @IsString()
     token: string;
 }
+
+export interface UserResponse {
+    accessToken: string;
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+}

@@ -8,6 +8,15 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemButton from '@mui/material/ListItemButton';
 
+
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+
 import api from "../../services/api";
 
 export default function SingleRecipe() {
@@ -35,17 +44,24 @@ export default function SingleRecipe() {
 	}
 
 	const getIngredientLabel  = (ingredient) => {
-		if(ingredient.type !== 'ingredient') return ingredient.value;
-		return labels[ingredient.value];
+		let ingredientLabel = ingredient.value;
+		if(ingredient.type === 'ingredient'){
+			ingredientLabel = labels[ingredient.value];
+		};
+		return ucfirst(ingredientLabel);
+	}
+
+	const ucfirst = (string) => {
+		return string.charAt(0).toUpperCase() + string.slice(1);
 	}
 
 	const IngredientsList = useCallback(() => {
 		if(!recipe?.ingredients) return null;
 		return recipe?.ingredients.map((ingredient, index) => (
-			<ListItem disablePadding key={index}>
-				<ListItemButton style={{textTransform: 'capitalize', fontWeight: ingredient.type == 'section' ? 'bold' : 'normal'}}>{getIngredientLabel(ingredient)}</ListItemButton>
-				<ListItemButton style={{justifyContent: 'end'}}>{ingredient.count}</ListItemButton>
-			</ListItem>
+			<TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+				<TableCell component="th" scope="row">{getIngredientLabel(ingredient)}</TableCell>
+				<TableCell align="right">{ingredient.count}</TableCell>
+			</TableRow>
 		))
 	}, [recipe.ingredients])
 
@@ -72,10 +88,21 @@ export default function SingleRecipe() {
 				</Grid>
 				
 				<Grid item xs={8}>
-					<Typography variant="h5">Բաղադրիչները</Typography>
-					<List>
-						<IngredientsList />
-					</List>
+					<Typography variant="h5" style={{paddingBottom: 10}}>Բաղադրիչները</Typography>
+
+					<TableContainer component={Paper}>
+						<Table sx={{ minWidth: 650 }} size="small">
+							<TableHead>
+								<TableRow>
+									<TableCell>Բաղադրիչը</TableCell>
+									<TableCell align="right">Քանակը</TableCell>
+								</TableRow>
+							</TableHead>
+							<TableBody>
+								<IngredientsList />
+							</TableBody>
+						</Table>
+					</TableContainer>
 				</Grid>
 			</Grid>
 		</Container>

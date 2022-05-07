@@ -8,6 +8,8 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
 import Chip from '@mui/material/Chip';
 import Paper from '@mui/material/Paper';
@@ -142,32 +144,37 @@ export default function Home() {
 				</Grid>
 			</Grid>
 			
-			<Grid item container xs={3} direction="column">
+			<Grid item container xs={3} spacing={4} direction="column">
 				<Grid item>
-					<Typography variant="h6" gutterBottom>Կատեգորիաներ</Typography>
-					<Select
-						fullWidth
-						value={filters.category}
-						label="Կատեգորիաներ"
-						onChange={selectCategory}
-					>	
-						{categories.map(category => <MenuItem key={category.id} value={category.id}>{category.title}</MenuItem>)}
-					</Select>
+					<FormControl fullWidth>
+						<InputLabel>Կատեգորիաներ</InputLabel>
+						<Select
+							fullWidth
+							value={filters.category}
+							label="Կատեգորիաներ"
+							onChange={selectCategory}
+						>	
+							<MenuItem key="none" value="">---</MenuItem>
+							{categories.map(category => <MenuItem key={category.id} value={category.id}>{category.title}</MenuItem>)}
+						</Select>
+					</FormControl>
 				</Grid>
 
 				<Grid item>
-					<Typography variant="h6" gutterBottom>Բաղադրիչներ</Typography>
-					<Autocomplete
-						fullWidth
-						value={null}
-						blurOnSelect
-						disablePortal={false}
-						options={ingredients}
-						getOptionLabel={(option) => option.title}
-						onChange={(event, value) => addIngredient(value)}
-						renderOption={(props, option) => <li {...props} key={option.id}>{option.title}</li> }
-						renderInput={(params) => <TextField {...params} placeholder="Ընտրել" />}
-					/>
+					<FormControl fullWidth>
+						<InputLabel>Բաղադրիչներ</InputLabel>
+						<Autocomplete
+							fullWidth
+							value={null}
+							blurOnSelect
+							disablePortal={false}
+							options={ingredients}
+							getOptionLabel={(option) => option.title}
+							onChange={(event, value) => addIngredient(value)}
+							renderOption={(props, option) => <li {...props} key={option.id}>{option.title}</li> }
+							renderInput={(params) => <TextField {...params} />}
+						/>
+					</FormControl>
 
 					<Paper
 						sx={{
