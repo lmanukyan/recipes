@@ -1,25 +1,19 @@
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useSnackbar } from 'notistack';
 
-import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormHelperText from '@mui/material/FormHelperText';
 import CircularProgress from '@mui/material/CircularProgress';
 import LoadingButton from '@mui/lab/LoadingButton';
-import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
 
 
 import api from "../../../services/api";
@@ -29,7 +23,7 @@ export default function EditIngredient() {
     let { id } = useParams();
     const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
-    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user);
 
     const [isLoaded, setIsLoaded] = useState(false);
     const [fetching, setFetching] = useState(false);
@@ -71,12 +65,28 @@ export default function EditIngredient() {
         setFetching(false);
     }
 
+    const deleteIngredient = async () => {
+        if( window.confirm(`Ջնջել <${ingredient.title}> բաղադրիչը ?`) ){
+            try{
+                await api.ingredients.delete(id);
+                enqueueSnackbar('Հաջողությամբ ջնջվեց', { variant: 'success' });
+                history.push(`/admin/ingredients`);
+            } catch(e){
+                errorHandler(e);
+            }
+        }
+    }
+
     const changeProp = (e, prop) => {
         setIngredient({
             ...ingredient,
             [prop]: e.target.value
         })
     }
+
+    const canDelete = useMemo(() => {
+        return id !== 'add' && ( user.isAdmin || user.meta.id == ingredient.author?.id );
+    }, [id, user, ingredient.author]);
 
     const errorHandler = (e) => {
         let errorMessages = e.response.data.message;
@@ -113,28 +123,33 @@ export default function EditIngredient() {
 
                 <Grid item container xs={4} spacing={4}>
 
-                    <Grid item xs={12}>
-                        {id === 'add' ? (
-                            <LoadingButton
-                                loading={fetching}
-                                loadingPosition="start"
-                                startIcon={<SaveIcon />}
-                                variant="contained"
-                                onClick={createIngredient}
-                            >
-                                Ստեղծել
-                            </LoadingButton>
-                        ) : (
-                            <LoadingButton
-                                loading={fetching}
-                                loadingPosition="start"
-                                startIcon={<SaveIcon />}
-                                variant="contained"
-                                onClick={saveIngredient}
-                            >
-                                Պահպանել
-                            </LoadingButton>
-                        )}
+                    <Grid item container xs={12}>
+                        <Grid item xs={6}>
+                            {id === 'add' ? (
+                                <LoadingButton
+                                    loading={fetching}
+                                    loadingPosition="start"
+                                    startIcon={<SaveIcon />}
+                                    variant="contained"
+                                    onClick={createIngredient}
+                                >
+                                    Ստեղծել
+                                </LoadingButton>
+                            ) : (
+                                <LoadingButton
+                                    loading={fetching}
+                                    loadingPosition="start"
+                                    startIcon={<SaveIcon />}
+                                    variant="contained"
+                                    onClick={saveIngredient}
+                                >
+                                    Պահպանել
+                                </LoadingButton>
+                            )}
+                        </Grid>
+                        <Grid item xs={6}>
+                            { canDelete && <Button onClick={deleteIngredient} variant="outlined" startIcon={<DeleteIcon />} color="error">Ջնջել</Button> }
+                        </Grid>
                     </Grid>
 
 

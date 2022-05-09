@@ -3,6 +3,7 @@ import axios, { httpBuildQuery } from "../axios";
 const endpoints = {
     getAll: (data) => axios.get(`categories/?${httpBuildQuery(data)}`),
     getById: (id) => axios.get(`categories/${id}`),
+    getBySlug: (slug) => axios.get(`categories/u/${slug}`),
     create: (data) => axios.post(`categories/create`, data),
     update: (id, data) => axios.put(`categories/${id}`, data),
     delete: (id) => axios.delete(`categories/${id}`),

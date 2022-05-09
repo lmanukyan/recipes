@@ -115,18 +115,9 @@ export class RecipesService {
     }
 
     async transform() {
-        let notFound = [];
-        for(let ingredientId of dataIngr){
-            let recipe = await this.recipeModel.findOne({
-                "ingredients.type": "ingredient",
-                "ingredients.value": ingredientId,
-            })
-            if(!recipe){
-                notFound.push(ingredientId)
-            }
-        }
+        
 
-        return notFound;
+        return [];
     }
 
 }

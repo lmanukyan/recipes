@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSnackbar } from 'notistack';
@@ -11,8 +11,10 @@ import FormControl from '@mui/material/FormControl';
 import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
 import LoadingButton from '@mui/lab/LoadingButton';
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import SaveIcon from '@mui/icons-material/Save';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import MenuItem from '@mui/material/MenuItem';
@@ -84,12 +86,28 @@ export default function EditUser() {
         setFetching(false);
     }
 
+    const deleteUser = async () => {
+        if( window.confirm(`Ջնջել <${editUser.name}> օգտատիրոջը ?`) ){
+            try{
+                await api.users.delete(id);
+                enqueueSnackbar('Հաջողությամբ ջնջվեց', { variant: 'success' });
+                history.push(`/admin/users`);
+            } catch(e){
+                errorHandler(e);
+            }
+        }
+    }
+
     const changeProp = (e, prop) => {
         setEditUser({
             ...editUser,
             [prop]: e.target.value
         })
     }
+
+    const canDelete = useMemo(() => {
+        return id !== 'add' && user.isAdmin && user.meta.id != id;
+    }, [id, user]);
 
     const errorHandler = (e) => {
         let errorMessages = e.response.data.message;
@@ -184,28 +202,33 @@ export default function EditUser() {
                 </Grid>
 
                 <Grid item container xs={4} spacing={4}>
-                    <Grid item xs={12}>
-                        {id === 'add' ? (
-                            <LoadingButton
-                                loading={fetching}
-                                loadingPosition="start"
-                                startIcon={<SaveIcon />}
-                                variant="contained"
-                                onClick={createUser}
-                            >
-                                Ստեղծել
-                            </LoadingButton>
-                        ) : (
-                            <LoadingButton
-                                loading={fetching}
-                                loadingPosition="start"
-                                startIcon={<SaveIcon />}
-                                variant="contained"
-                                onClick={saveUser}
-                            >
-                                Պահպանել
-                            </LoadingButton>
-                        )}
+                    <Grid item container xs={12}>
+                        <Grid item xs={6}>
+                            {id === 'add' ? (
+                                <LoadingButton
+                                    loading={fetching}
+                                    loadingPosition="start"
+                                    startIcon={<SaveIcon />}
+                                    variant="contained"
+                                    onClick={createUser}
+                                >
+                                    Ստեղծել
+                                </LoadingButton>
+                            ) : (
+                                <LoadingButton
+                                    loading={fetching}
+                                    loadingPosition="start"
+                                    startIcon={<SaveIcon />}
+                                    variant="contained"
+                                    onClick={saveUser}
+                                >
+                                    Պահպանել
+                                </LoadingButton>
+                            )}
+                        </Grid>
+                        <Grid item xs={6}>
+                            { canDelete && <Button onClick={deleteUser} variant="outlined" startIcon={<DeleteIcon />} color="error">Ջնջել</Button> }
+                        </Grid>
                     </Grid>
                 </Grid>
 

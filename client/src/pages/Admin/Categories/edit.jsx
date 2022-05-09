@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useSnackbar } from 'notistack';
 
 import Grid from '@mui/material/Grid';
@@ -7,9 +8,11 @@ import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
+import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import LoadingButton from '@mui/lab/LoadingButton';
 import SaveIcon from '@mui/icons-material/Save';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 
 import TextEditor from '../../../components/Admin/TextEditor';
@@ -21,6 +24,7 @@ export default function EditCategory() {
     let { id } = useParams();
     const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
+    const user = useSelector((state) => state.user);
 
     const [isLoaded, setIsLoaded] = useState(false);
     const [fetching, setFetching] = useState(false);
@@ -28,6 +32,7 @@ export default function EditCategory() {
         title: '',
         slug: '',
         description: '',
+        author: null
     });
 
 
@@ -64,6 +69,18 @@ export default function EditCategory() {
         setFetching(false);
     }
 
+    const deleteCategory = async () => {
+        if( window.confirm(`Ջնջել <${category.title}> կատեգորիան ?`) ){
+            try{
+                await api.categories.delete(id);
+                enqueueSnackbar('Հաջողությամբ ջնջվեց', { variant: 'success' });
+                history.push(`/admin/categories`);
+            } catch(e){
+                errorHandler(e);
+            }
+        }
+    }
+
     const changeProp = (e, prop) => {
         setCategory({
             ...category,
@@ -77,6 +94,10 @@ export default function EditCategory() {
             description: window.tinymce.activeEditor.getContent()
         }
     }
+
+    const canDelete = useMemo(() => {
+        return id !== 'add' && ( user.isAdmin || user.meta.id == category.author?.id );
+    }, [id, user, category.author]);
 
     const errorHandler = (e) => {
         let errorMessages = e.response.data.message;
@@ -130,28 +151,34 @@ export default function EditCategory() {
 
                 <Grid item container xs={4} spacing={4}>
 
-                    <Grid item xs={12}>
-                        {id === 'add' ? (
-                            <LoadingButton
-                                loading={fetching}
-                                loadingPosition="start"
-                                startIcon={<SaveIcon />}
-                                variant="contained"
-                                onClick={createCategory}
-                            >
-                                Ստեղծել
-                            </LoadingButton>
-                        ) : (
-                            <LoadingButton
-                                loading={fetching}
-                                loadingPosition="start"
-                                startIcon={<SaveIcon />}
-                                variant="contained"
-                                onClick={saveCategory}
-                            >
-                                Պահպանել
-                            </LoadingButton>
-                        )}
+                    <Grid item container xs={12}>
+                        
+                        <Grid item xs={6}>
+                            {id === 'add' ? (
+                                <LoadingButton
+                                    loading={fetching}
+                                    loadingPosition="start"
+                                    startIcon={<SaveIcon />}
+                                    variant="contained"
+                                    onClick={createCategory}
+                                >
+                                    Ստեղծել
+                                </LoadingButton>
+                            ) : (
+                                <LoadingButton
+                                    loading={fetching}
+                                    loadingPosition="start"
+                                    startIcon={<SaveIcon />}
+                                    variant="contained"
+                                    onClick={saveCategory}
+                                >
+                                    Պահպանել
+                                </LoadingButton>
+                            )}
+                        </Grid>
+                        <Grid item xs={6}>
+                            { canDelete && <Button onClick={deleteCategory} variant="outlined" startIcon={<DeleteIcon />} color="error">Ջնջել</Button> }
+                        </Grid>
                     </Grid>
 
 

@@ -1,14 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useHistory, useParams, Link } from 'react-router-dom';
+
 import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemButton from '@mui/material/ListItemButton';
-
-
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -16,21 +12,29 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import Button from '@mui/material/Button';
+import EditIcon from '@mui/icons-material/Edit';
 
 import api from "../../services/api";
 
 export default function SingleRecipe() {
 	let { slug } = useParams();
 	const history = useHistory();
+	const user = useSelector((state) => state.user);
 	const [labels, setLabels] = useState({});
-	const [recipe, setRecipe] = useState({});
+	const [recipe, setRecipe] = useState({
+		title: '',
+		instructions: '',
+		ingredients: [],
+		categories: [],
+	});
 
 	const loadRecipe = async () => {
         try{
             const { data } = await api.recipes.getBySlug(slug);
 			await loadIngredientLabels(data.ingredient_ids);
             setRecipe(data);
-            console.log(data);
+			document.title = data.title;
         } catch(e){
             history.push('/not-found');
         }
@@ -88,7 +92,7 @@ export default function SingleRecipe() {
 				</Grid>
 				
 				<Grid item xs={8}>
-					<Typography variant="h5" style={{paddingBottom: 10}}>Բաղադրիչները</Typography>
+					<Typography variant="h5" style={{paddingBottom: 15}}>Բաղադրիչները</Typography>
 
 					<TableContainer component={Paper}>
 						<Table sx={{ minWidth: 650 }} size="small">
@@ -104,6 +108,16 @@ export default function SingleRecipe() {
 						</Table>
 					</TableContainer>
 				</Grid>
+				
+				<Grid item xs={12}>
+					<Typography>Կատեգորիա։ {recipe.categories.map((category, index) => <Typography component={Link} to={`/category/${category.slug}`} key={category.id}>{category.title}{recipe.categories.length > index + 1 ? ', ' : ''}</Typography>)} </Typography>
+				</Grid>
+
+				<Grid item container xs={12} justifyContent="end">
+					{ user.isAdmin && <Button component={Link} to={`/admin/recipes/${recipe.id}`} startIcon={<EditIcon />}> Խմբագրել</Button> }
+				</Grid>
+
+
 			</Grid>
 		</Container>
 	);

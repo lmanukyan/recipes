@@ -36,6 +36,11 @@ export class CategoriesController {
         return this.categoriesService.getById(id);
     }
 
+    @Get('/u/:slug')
+    getByslug(@Param('slug') slug: string) {
+        return this.categoriesService.getBySlug(slug);
+    }
+
     @Get()
     getAll(@Query() params) {
         return this.categoriesService.getAll(params);

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, memo } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@mui/styles';
 
@@ -53,7 +53,7 @@ const useStyles = makeStyles({
     }
 });
 
-export default function MediaUploader({ setRecipeThumbnail, setMediaUploaderOpened }){
+function MediaUploader({ setRecipeThumbnail, setMediaUploaderOpened }){
     const classes = useStyles();
     const searchTerm = useRef();
     const user = useSelector((state) => state.user);
@@ -198,3 +198,5 @@ export default function MediaUploader({ setRecipeThumbnail, setMediaUploaderOpen
         </Box>
     )
 }
+
+export default memo(MediaUploader);

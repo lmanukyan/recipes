@@ -46,6 +46,17 @@ export class CategoriesService {
         return category;
     }
 
+    async getBySlug(slug: string): Promise<Category> {
+        const category: Category = await this.categoryModel.findOne({slug: slug})
+            .populate({ path: 'author', select: 'name' })
+        
+        if(category === null){
+            throw new NotFoundException();
+        }
+        
+        return category;
+    }
+
     async getAll(params): Promise<{categories: Category[], count: number}> {
         const categories: Category[] = await this.categoryModel
             .find(params.filters)

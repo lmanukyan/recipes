@@ -1,7 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
-
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -21,6 +20,8 @@ import Recipe from '../../components/Recipe';
 import api from "../../services/api";
 
 export default function Home() {
+	let { slug } = useParams();
+	let history = useHistory();
 	const [recipes, setRecipes] = useState([]);
 	const [ingredients, setIngredients] = useState([]);
 	const [categories, setCategories] = useState([]);
@@ -50,7 +51,6 @@ export default function Home() {
 		}
 		setCount(data.count);
 		setLoading(false);
-		console.log(data, `append: ${append}`, append ? recipes.length : 0);
     }
 
 	const loadIngredients = async () => {
@@ -113,11 +113,46 @@ export default function Home() {
 		};
 	}
 
+	const loadSingleCategory = async () => {
+		try {
+			const { data } = await api.categories.getBySlug(slug);
+			setFilters({
+				...filters,
+				category: data
+			});
+			document.title = data.title;
+		} catch(e){
+			history.push('/not-found');
+		}
+	}
+
+	const getFilterIngrediants = () => {
+		let selecteds = filters.ingredients.map(i => i.id);
+		return ingredients.filter(i => ! selecteds.includes(i.id) );
+	}
+
+	const isCategoryPage = useMemo(() => {
+		if(slug === '' || typeof slug === 'undefined'){
+			return false;
+		}
+		return true;
+	}, [slug])
+
 	useEffect(() => {
-        loadRecipes();
+		if( ! isCategoryPage ){
+			loadRecipes();
+			loadCategories();
+		} else {
+			loadSingleCategory();
+		}
         loadIngredients();
-        loadCategories();
-    }, []);
+    }, [slug]);
+
+	useEffect(() => {
+		if(slug !== '' && filters.category !== ''){
+			loadRecipes();
+		}
+    }, [filters.category, slug]);
 
 	const IngredinetsChips = useCallback(() => {
 		return filters.ingredients.map(ingredient => (
@@ -129,10 +164,11 @@ export default function Home() {
 
 	return (
 	<>
-		<Intro />
+		<Intro category={isCategoryPage ? filters.category : null} />
 		
-		<Grid container style={{padding: 32}} spacing={2}>
-			<Grid item container xs={9} spacing={2}>
+		<Grid container style={{padding: 32}} spacing={2} sx={{ flexFlow: { sm: 'column-reverse', lg: 'row' } }}>
+
+			<Grid item container lg={9} sm={12} spacing={2}>
 
 				<Grid item container spacing={2}>
 					{recipes.map(recipe => <Recipe key={recipe.id} {...recipe} />)}
@@ -144,35 +180,37 @@ export default function Home() {
 				</Grid>
 			</Grid>
 			
-			<Grid item container xs={3} spacing={4} direction="column">
-				<Grid item>
-					<FormControl fullWidth>
-						<InputLabel>Կատեգորիաներ</InputLabel>
-						<Select
-							fullWidth
-							value={filters.category}
-							label="Կատեգորիաներ"
-							onChange={selectCategory}
-						>	
-							<MenuItem key="none" value="">---</MenuItem>
-							{categories.map(category => <MenuItem key={category.id} value={category.id}>{category.title}</MenuItem>)}
-						</Select>
-					</FormControl>
-				</Grid>
+			<Grid item container lg={3} sm={12} spacing={4} direction="column">
+				
+				{ ! isCategoryPage ? (
+					<Grid item>
+						<FormControl fullWidth>
+							<InputLabel>Կատեգորիաներ</InputLabel>
+							<Select
+								fullWidth
+								value={filters.category}
+								label="Կատեգորիաներ"
+								onChange={selectCategory}
+							>	
+								<MenuItem key="none" value="">---</MenuItem>
+								{categories.map(category => <MenuItem key={category.id} value={category.id}>{category.title}</MenuItem>)}
+							</Select>
+						</FormControl>
+					</Grid>
+				) : null }
 
 				<Grid item>
 					<FormControl fullWidth>
-						<InputLabel>Բաղադրիչներ</InputLabel>
 						<Autocomplete
 							fullWidth
 							value={null}
 							blurOnSelect
 							disablePortal={false}
-							options={ingredients}
+							options={getFilterIngrediants()}
 							getOptionLabel={(option) => option.title}
 							onChange={(event, value) => addIngredient(value)}
 							renderOption={(props, option) => <li {...props} key={option.id}>{option.title}</li> }
-							renderInput={(params) => <TextField {...params} />}
+							renderInput={(params) => <TextField {...params} label="Բաղադրիչներ" />}
 						/>
 					</FormControl>
 

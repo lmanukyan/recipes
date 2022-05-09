@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { Grid, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 import kitchen from './kitchen.jpg';
@@ -27,10 +28,18 @@ const IntroText = styled(Typography)({
 	textShadow: '5px 5px 20px #000'
 })
 
-export default function Intro() {
+function Intro({ category }) {
+	console.log('category: ', category );
+
+	const introTitle = useMemo(() => {
+		return category ? category.title : 'Փնտրիր համեղ բաղադրատոմսեր <br/> ըստ բաղադրիչների';
+	}, [category])
+
 	return (
         <IntroWallpaper container alignItems="center" justifyContent="center">
-			<IntroText>Փնտրիր համեղ բաղադրատոմսեր <br/> ըստ բաղադրիչների</IntroText>
+			<IntroText dangerouslySetInnerHTML={{__html: introTitle}}></IntroText>
 		</IntroWallpaper>
     )
 }
+
+export default memo(Intro); 

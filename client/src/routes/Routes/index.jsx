@@ -10,6 +10,7 @@ import Registration from "../../pages/Registration";
 import ResetPassword from "../../pages/ResetPassword";
 import ChangePassword from "../../pages/ChangePassword";
 import NotFound from "../../pages/NotFound";
+import Wishlist from "../../pages/Wishlist";
 import SingleRecipe from "../../pages/SingleRecipe";
 
 import Admin from "../../pages/Admin";
@@ -74,8 +75,16 @@ export default function Routes() {
 				<NotFound />
 			</PublicRoute>
 
+			<PublicRoute path="/wishlist">
+				<Wishlist />
+			</PublicRoute>
+
 			<PublicRoute path="/recipe/:slug">
 				<SingleRecipe />
+			</PublicRoute>
+
+			<PublicRoute path="/category/:slug" noPadding={true}>
+				<Home />
 			</PublicRoute>
 
 			<PrivateRoute exact path="/admin" layout={AdminLayout} pagename="Գլխավոր">

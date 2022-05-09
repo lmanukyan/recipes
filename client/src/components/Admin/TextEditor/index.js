@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 
-export default function TextEditor({ value }){
+function TextEditor({ value }){
     return (
         <Editor
             apiKey='kmzmb646d24w4ao183s1uwk29tt5eyl1tw05vi4x8gg0bsg0'
@@ -23,3 +24,5 @@ export default function TextEditor({ value }){
         />
     );
 }
+
+export default memo(TextEditor);

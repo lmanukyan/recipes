@@ -1,5 +1,6 @@
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useSnackbar } from 'notistack';
 import { styled } from '@mui/system';
 
@@ -15,6 +16,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import LoadingButton from '@mui/lab/LoadingButton';
 import IconButton from '@mui/material/IconButton';
 import SaveIcon from '@mui/icons-material/Save';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
@@ -42,13 +44,19 @@ export default function EditRecipe() {
     const { enqueueSnackbar } = useSnackbar();
 
     const history = useHistory();
+    const user = useSelector((state) => state.user);
     
-    const [recipeId, setRecipeId] = useState(null);
-    const [recipeTitle, setRecipeTitle] = useState('');
-    const [recipeSlug, setRecipeSlug] = useState('');
-    const [recipeStatus, setRecipeStatus] = useState('draft');
+    const [recipe, setRecipe] = useState({
+        id: '',
+        title: '',
+        slug: '',
+        status: 'draft',
+        instructions: '',
+        author: null
+    });
+
+
     const [recipeThumbnail, setRecipeThumbnail] = useState(null);
-    const [recipeInstructions, setRecipeInstructions] = useState('');
     const [recipeCategories, setRecipeCategories] = useState([]);
     const [recipeIngredients, setRecipeIngredients] = useState([]);
     
@@ -56,15 +64,21 @@ export default function EditRecipe() {
     const [isRecipeLoaded, setRecipeLoaded] = useState(false);
     const [mediaUploaderOpened, setMediaUploaderOpened] = useState(false);
 
+
     const loadRecipe = async () => {
         try{
             const { data } = await api.recipes.getById(id);
-            setRecipeId(data.id);
-            setRecipeTitle(data.title);
-            setRecipeSlug(data.slug);
-            setRecipeStatus(data.status);
+
+            setRecipe({
+                title: data.title,
+                slug: data.slug,
+                status: data.status,
+                instructions: data.instructions,
+                author: data.author,
+            });
+
+
             setRecipeThumbnail(data.thumbnail);
-            setRecipeInstructions(data.instructions);
             setRecipeCategories(data.categories);
             setRecipeIngredients(data.ingredients);
             setRecipeLoaded(true);
@@ -76,7 +90,7 @@ export default function EditRecipe() {
     const saveRecipe = async () => {
         setFetching(true);
         try{
-            const { data } = await api.recipes.update(recipeId, getRecipeData());
+            const { data } = await api.recipes.update(id, getRecipeData());
             enqueueSnackbar('Հաջողությամբ պահպանվեց', { variant: 'success' });
         } catch(e){
             errorHandler(e);
@@ -96,20 +110,34 @@ export default function EditRecipe() {
         setFetching(false);
     }
 
-    const selectImage = (item) => {
-        setMediaUploaderOpened(false);
-        setRecipeThumbnail(item);
+    const deleteRecipe = async () => {
+        if( window.confirm(`Ջնջել <${recipe.title}> բաղադրատոմսը ?`) ){
+            try{
+                await api.recipes.delete(id);
+                enqueueSnackbar('Հաջողությամբ ջնջվեց', { variant: 'success' });
+                history.push(`/admin/recipes`);
+            } catch(e){
+                errorHandler(e);
+            }
+        }
     }
 
     const removeRecipeImage = () => {
         setRecipeThumbnail(null);
     }
 
+    const changeProp = (key, value) => {
+        setRecipe({
+            ...recipe,
+            [key]: value
+        })
+    }
+
     const getRecipeData = () => {
         return {
-            title: recipeTitle,
-            slug: recipeSlug,
-            status: recipeStatus,
+            title: recipe.title,
+            slug: recipe.slug,
+            status: recipe.status,
             thumbnail: recipeThumbnail ? recipeThumbnail.id : null,
             categories: recipeCategories.map(category => category.id),
             ingredients: recipeIngredients,
@@ -122,6 +150,10 @@ export default function EditRecipe() {
         errorMessages = Array.isArray(errorMessages) ? errorMessages : [errorMessages];
         errorMessages.map(message => enqueueSnackbar(message, { variant: 'error' }));
     }
+
+    const canDelete = useMemo(() => {
+        return id !== 'add' && ( user.isAdmin || user.meta.id == recipe.author?.id );
+    }, [id, user, recipe.author]);
 
     useEffect(() => {
         if(id !== 'add'){
@@ -149,10 +181,10 @@ export default function EditRecipe() {
                         <FormControl component="fieldset" fullWidth={true}>
                           <Typography variant="h6">Անվանումը</Typography>
                           <TextField
-                            value={recipeTitle}
+                            value={recipe.title}
                             type="text"
                             variant="standard"
-                            onChange={(e) => setRecipeTitle(e.target.value)}
+                            onChange={(e) => changeProp('title', e.target.value)}
                           />
                         </FormControl>
                     </Grid>
@@ -160,10 +192,10 @@ export default function EditRecipe() {
                         <FormControl component="fieldset" fullWidth={true}>
                           <Typography variant="h6">Լինկ</Typography>
                           <TextField
-                            value={decodeURIComponent(recipeSlug)}
+                            value={decodeURIComponent(recipe.slug)}
                             type="text"
                             variant="standard"
-                            onChange={(e) => setRecipeSlug(e.target.value)}
+                            onChange={(e) => changeProp('slug', e.target.value)}
                           />
                         </FormControl>
                     </Grid>
@@ -171,7 +203,7 @@ export default function EditRecipe() {
                     <Grid item xs={12}>
                         <FormControl component="fieldset" fullWidth={true}>
                             <FieldLabel variant="h6">Պատրաստման եղանակը</FieldLabel>
-                            <TextEditor value={recipeInstructions} />
+                            <TextEditor value={recipe.instructions} />
                         </FormControl>
                     </Grid>
 
@@ -183,34 +215,39 @@ export default function EditRecipe() {
 
                 <Grid item container xs={4} spacing={4}>
 
-                    <Grid item xs={12}>
-                        {id === 'add' ? (
-                            <LoadingButton
-                                loading={fetching}
-                                loadingPosition="start"
-                                startIcon={<SaveIcon />}
-                                variant="contained"
-                                onClick={createRecipe}
-                            >
-                                Ստեղծել
-                            </LoadingButton>
-                        ) : (
-                            <LoadingButton
-                                loading={fetching}
-                                loadingPosition="start"
-                                startIcon={<SaveIcon />}
-                                variant="contained"
-                                onClick={saveRecipe}
-                            >
-                                Պահպանել
-                            </LoadingButton>
-                        )}
+                    <Grid item container xs={12}>
+                        <Grid item xs={6}>
+                            {id === 'add' ? (
+                                <LoadingButton
+                                    loading={fetching}
+                                    loadingPosition="start"
+                                    startIcon={<SaveIcon />}
+                                    variant="contained"
+                                    onClick={createRecipe}
+                                >
+                                    Ստեղծել
+                                </LoadingButton>
+                            ) : (
+                                <LoadingButton
+                                    loading={fetching}
+                                    loadingPosition="start"
+                                    startIcon={<SaveIcon />}
+                                    variant="contained"
+                                    onClick={saveRecipe}
+                                >
+                                    Պահպանել
+                                </LoadingButton>
+                            )}
+                        </Grid>
+                        <Grid item xs={6}>
+                            { canDelete && <Button onClick={deleteRecipe} variant="outlined" startIcon={<DeleteIcon />} color="error">Ջնջել</Button> }
+                        </Grid>
                     </Grid>
 
                     <Grid item xs={12}>
                         <FormControl component="fieldset" fullWidth={true}>
                             <FieldLabel variant="h6">Վիճակը</FieldLabel>
-                            <Select value={recipeStatus} onChange={(e) => setRecipeStatus(e.target.value)}>
+                            <Select value={recipe.status} onChange={(e) => changeProp('status', e.target.value)}>
                                 <MenuItem value="publish">Հրապարակված</MenuItem>
                                 <MenuItem value="draft">Չհրապարակված</MenuItem>
                             </Select>
