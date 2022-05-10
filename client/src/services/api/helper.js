@@ -1,7 +1,7 @@
 const SiteRoles = {
     administrator: 'Ադմինիստրատոր',
     moderator: 'Մոդերատոր',
-    editor: 'Հեղինակ'
+    editor: 'Օգտվող'
 }
 
 export const SiteRolesArray = (() => {

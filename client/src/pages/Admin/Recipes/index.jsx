@@ -6,6 +6,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import Button from '@mui/material/Button';
@@ -50,6 +51,7 @@ export default function Recipes() {
           headerName: 'Գործողություններ',
           width: 200,
           getActions: (params) => checkActionCaps(params) ? [
+              <GridActionsCellItem icon={<VisibilityIcon />} label="Դիտել" component={Link} to={`/recipe/${params.row.slug}`} />,
               <GridActionsCellItem icon={<EditIcon />} label="Փոփոխել" component={Link} to={`/admin/recipes/${params.row.id}`} />,
               <GridActionsCellItem icon={<DeleteIcon />} label="Ջնջել" onClick={() => deleteRecipe(params.row)} />
           ] : [],

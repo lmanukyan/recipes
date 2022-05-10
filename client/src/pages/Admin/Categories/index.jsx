@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { styled } from '@mui/system';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import Button from '@mui/material/Button';
@@ -29,6 +30,7 @@ export default function Categories() {
             type: 'actions',
             headerName: 'Գործողություններ',
             getActions: (params) => user.isAdmin ? [
+                <GridActionsCellItem icon={<VisibilityIcon />} label="Դիտել" component={Link} to={`/category/${params.row.slug}`} />,
                 <GridActionsCellItem icon={<EditIcon />} label="Փոփոխել" component={Link} to={`/admin/categories/${params.row.id}`} />,
                 <GridActionsCellItem icon={<DeleteIcon />} label="Ջնջել" onClick={() => deleteCategory(params.row)} />
             ] : (

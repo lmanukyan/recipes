@@ -96,7 +96,7 @@ export default function Users() {
     }
 
     const deleteUser = async (rowUser) => {
-        if(user.id === rowUser.id){
+        if(user.meta.id == rowUser.id){
             alert('Դուք չեք կարող ջնջել սեփական պրոֆիլը');
             return;
         }

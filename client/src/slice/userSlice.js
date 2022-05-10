@@ -17,12 +17,7 @@ export const userSlice = createSlice({
 		setIsLoaded: (state, { payload }) => {
 			state.isLoaded	= payload
 		},
-		setMeta: (state, { payload }) => {
-			state.meta = payload;
-			state.isAdmin = payload.role === 'administrator' ? true : false;
-		},
 		logOut: (state) => {
-			console.log('initialState: ', initialState)
 			state = initialState;
 		},
 		logIn: (state, { payload }) => {

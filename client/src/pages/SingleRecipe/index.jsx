@@ -110,7 +110,9 @@ export default function SingleRecipe() {
 				</Grid>
 				
 				<Grid item xs={12}>
+					<Typography>Ավելացվել է։ {new Date(recipe.createdAt).toLocaleString()} </Typography>
 					<Typography>Կատեգորիա։ {recipe.categories.map((category, index) => <Typography component={Link} to={`/category/${category.slug}`} key={category.id}>{category.title}{recipe.categories.length > index + 1 ? ', ' : ''}</Typography>)} </Typography>
+					<Typography>Հեղինակ։ {recipe.author?.name} </Typography>
 				</Grid>
 
 				<Grid item container xs={12} justifyContent="end">

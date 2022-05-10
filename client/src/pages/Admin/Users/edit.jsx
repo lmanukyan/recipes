@@ -79,7 +79,7 @@ export default function EditUser() {
                 password: editUser.newPassword
             });
             enqueueSnackbar('Հաջողությամբ ավելացվեց', { variant: 'success' });
-            history.push(`/admin/users/${data.id}`);
+            history.push(`/admin/users`);
         } catch(e){
             errorHandler(e);
         }

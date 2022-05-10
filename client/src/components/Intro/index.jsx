@@ -32,7 +32,7 @@ function Intro({ category }) {
 	console.log('category: ', category );
 
 	const introTitle = useMemo(() => {
-		return category ? category.title : 'Փնտրիր համեղ բաղադրատոմսեր <br/> ըստ բաղադրիչների';
+		return category ? category.title : 'Խոհարարությունը սկսվում է <br/> լավ բաղադրատոմսով';
 	}, [category])
 
 	return (

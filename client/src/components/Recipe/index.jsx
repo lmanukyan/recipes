@@ -41,21 +41,21 @@ function Recipe({ id, slug, title, thumbnail, gridCol = 4 }) {
 
 	return (
 		<Grid item lg={gridCol} md={6}>
-			<Card style={{height: '100%'}}>
+			<Card style={{height: '100%', display: 'flex', flexDirection: 'column'}}>
 				{ thumbnail ? (
 					<CardMedia
 						component="img"
 						height="240"
 						image={process.env.REACT_APP_DOMAIN_URL + thumbnail.path}
-						alt="green iguana"
+						alt={title}
 					/>
 				) : <Skeleton variant="rectangular" height={240} /> }
-				<CardContent>
+				<CardContent style={{flex: '1 1 auto'}}>
 					<RecipeTitle to={`/recipe/${slug}`}>{title}</RecipeTitle>
 				</CardContent>
 				<CardActions disableSpacing style={{justifyContent: 'space-between'}}>
-					<IconButton onClick={handleWishlist} color={wishlisted ? 'error' : 'default'}>
-						<FavoriteIcon />
+					<IconButton onClick={handleWishlist}>
+						<FavoriteIcon style={{fill: wishlisted ? '#ff0000' : '#cbcbcb'}} />
 					</IconButton>
 					<Button component={Link} to={`/recipe/${slug}`}>Դիտել</Button>
 				</CardActions>

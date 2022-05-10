@@ -12,6 +12,7 @@ import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
 import Chip from '@mui/material/Chip';
 import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 
 import Intro from '../../components/Intro';
 import Recipe from '../../components/Recipe';
@@ -149,7 +150,7 @@ export default function Home() {
     }, [slug]);
 
 	useEffect(() => {
-		if(slug !== '' && filters.category !== ''){
+		if( isCategoryPage && filters.category !== ''){
 			loadRecipes();
 		}
     }, [filters.category, slug]);
@@ -170,9 +171,15 @@ export default function Home() {
 
 			<Grid item container lg={9} sm={12} spacing={2}>
 
-				<Grid item container spacing={2}>
-					{recipes.map(recipe => <Recipe key={recipe.id} {...recipe} />)}
-				</Grid>
+				{ recipes.length > 0 ? (
+					<Grid item container spacing={2}>
+						{recipes.map(recipe => <Recipe key={recipe.id} {...recipe} />)}
+					</Grid>
+				) : (
+					<Grid item container alignItems="center" justifyContent="center">
+						{ ! loading && <Typography>Չի գտնվել</Typography> }
+					</Grid>
+				) }
 
 				<Grid item container justifyContent="center">
 					{ loading && <CircularProgress color="inherit" /> }
