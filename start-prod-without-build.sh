@@ -12,8 +12,4 @@ caddy run
 
 # մեկնարկում ենք backend server - ը
 cd server
-yarn start:dev &
-
-# մեկնարկում ենք client - ը
-cd ../client
-yarn start &
+yarn start

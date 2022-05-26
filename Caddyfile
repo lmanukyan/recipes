@@ -1,5 +1,5 @@
 http://recipes.loc {
-  bind {$ADDRESS}
-  reverse_proxy localhost:5000
-  tls internal
+        bind {$ADDRESS}
+        reverse_proxy localhost:5000
+        tls internal
 }
